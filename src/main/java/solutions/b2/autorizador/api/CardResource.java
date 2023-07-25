@@ -3,6 +3,7 @@ package solutions.b2.autorizador.api;
 import java.net.URI;
 
 import jakarta.inject.Inject;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -25,7 +26,7 @@ public class CardResource {
 	private CardService cardService;
 	
 	@POST
-	public Response createCard(NewCardRequest request, @Context UriInfo uriInfo) {
+	public Response createCard(@Valid NewCardRequest request, @Context UriInfo uriInfo) {
 		Card card = Card.builder()
 				.number(request.getCardNumber())
 				.password(request.getPassword())
@@ -34,7 +35,7 @@ public class CardResource {
 		try {
 			card = cardService.create(card);
 		} catch(CardNumberAlreadyInUseException e) {
-			return Response.status(Response.Status.BAD_REQUEST).build();
+			return Response.status(Response.Status.BAD_REQUEST).entity(request).build();
 		}
 		
 		URI uri = uriInfo.getAbsolutePathBuilder().path(card.getCode().toString()).build();
